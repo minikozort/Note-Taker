@@ -1,29 +1,31 @@
 const express = require('express');
 const path = require('path');
-const api = require('./routes/index.js');
-
-const PORT = process.env.PORT || 3001;
+const fs = require('fs').promises; // For file operations
+const apiRouter = require('./routes/routes'); // Assuming you'll define API routes in a separate file
 
 const app = express();
+const PORT = process.env.PORT || 3001;
 
-
-// Middleware for parsing JSON and urlencoded form data
+// Middleware to parse JSON and urlencoded data
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use('/api', api);
 
-app.use(express.static('public'));
+// Serve static files from the 'public' directory
+app.use(express.static(path.join(__dirname, 'public')));
 
-// GET Route for homepage
-app.get('/', (req, res) =>
-  res.sendFile(path.join(__dirname, '/public/assets/index.html'))
-);
+// Define routes
+app.use('/api', apiRouter); // This will handle routes like '/api/notes'
 
-// GET Route for feedback page
-app.get('/feedback', (req, res) =>
-  res.sendFile(path.join(__dirname, '/public/assets/notes.html'))
-);
+// Routes for serving HTML files
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, '/public/assets/index.html'));
+});
 
-app.listen(PORT, () =>
-  console.log(`App listening at http://localhost:${PORT}`)
-);
+app.get('/notes', (req, res) => {
+  res.sendFile(path.join(__dirname, '/public/assets/notes.html'));
+});
+
+// Start the server
+app.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
+});
