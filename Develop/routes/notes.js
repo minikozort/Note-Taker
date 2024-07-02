@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const path = require('path');
 const fs = require('fs').promises;
+const { v4: uuidv4 } = require('uuid'); // Import uuid
 
 const DB_FILE = path.join(__dirname, '../db.json');
 
@@ -35,12 +36,12 @@ router.get('/', async (req, res) => {
   }
 });
 
-// POST a new note
+// POST a new note with UUID
 router.post('/', async (req, res) => {
   try {
     const notes = await readDb();
     const newNote = {
-      id: notes.length + 1,
+      id: uuidv4(), // Generate a UUID for the new note
       title: req.body.title,
       text: req.body.text
     };
@@ -58,7 +59,7 @@ router.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     let notes = await readDb();
-    notes = notes.filter(note => note.id !== parseInt(id));
+    notes = notes.filter(note => note.id !== id); // Use strict comparison since IDs are UUIDs
     await writeDb(notes);
     res.sendStatus(204);
   } catch (err) {
