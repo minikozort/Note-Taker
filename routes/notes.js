@@ -2,20 +2,22 @@ const express = require('express');
 const router = express.Router();
 const path = require('path');
 const fs = require('fs').promises;
+
 const { v4: uuidv4 } = require('uuid'); // Import uuid
 
-const DB_FILE = path.join(__dirname, '../db.json');
+const DB_FILE = path.join(__dirname, '../db/db.json');
 
 // Helper function to read and write to db.json
 const readDb = async () => {
   try {
     const data = await fs.readFile(DB_FILE, 'utf8');
-    return JSON.parse(data);
+    return data;
   } catch (err) {
     console.error('Error reading db.json:', err);
     return [];
   }
 };
+
 
 const writeDb = async (data) => {
   try {
@@ -29,7 +31,7 @@ const writeDb = async (data) => {
 router.get('/', async (req, res) => {
   try {
     const notes = await readDb();
-    res.json(notes);
+    res.send(notes);
   } catch (err) {
     console.error('Error fetching notes:', err);
     res.status(500).send('Server Error');
@@ -39,12 +41,13 @@ router.get('/', async (req, res) => {
 // POST a new note with UUID
 router.post('/', async (req, res) => {
   try {
-    const notes = await readDb();
+    let notes = await readDb();
     const newNote = {
       id: uuidv4(), // Generate a UUID for the new note
       title: req.body.title,
       text: req.body.text
     };
+    notes = JSON.parse(notes)
     notes.push(newNote);
     await writeDb(notes);
     res.status(201).json(newNote);
