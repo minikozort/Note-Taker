@@ -47,7 +47,7 @@ router.post('/', async (req, res) => {
       title: req.body.title,
       text: req.body.text
     };
-    notes = JSON.parse(notes)
+    notes = JSON.parse(notes);
     notes.push(newNote);
     await writeDb(notes);
     res.status(201).json(newNote);
@@ -62,6 +62,7 @@ router.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     let notes = await readDb();
+    notes = JSON.parse(notes);
     notes = notes.filter(note => note.id !== id); // Use strict comparison since IDs are UUIDs
     await writeDb(notes);
     res.sendStatus(204);
